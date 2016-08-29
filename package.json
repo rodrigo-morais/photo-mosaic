@@ -1,0 +1,17 @@
+{
+  "author": "Canva",
+  "name": "mosaic",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "npm run build && node dist/server.js",
+    "build": "rm -Rf dist && babel js/client -d dist/js/client && npm run copy:html && npm run copy:server && npm run copy:mosaicJS",
+    "copy:html": "cp mosaic.html dist/",
+    "copy:server": "cp server.js dist",
+    "copy:mosaicJS": "cp js/mosaic.js dist/js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-plugin-transform-es2015-modules-systemjs": "^6.12.0",
+    "babel-preset-es2015": "^6.13.2"
+  }
+}

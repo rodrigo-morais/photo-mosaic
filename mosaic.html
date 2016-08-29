@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="js/mosaic.js"></script>
+    <title>Mosaic</title>
+  </head>
+  <body>
+    <input type="file" id="files" />
+    <img id="image" />
+    <canvas id="imgCanvas" width="578" height="200"></canvas>
+    <button id="createMosaic">Create Mosaic</button>
+    <canvas id="mosaicCanvas" width="0" height="0"></canvas>
+
+
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.19.37/system.js"></script>
+    <script>
+      System.config({ "baseURL": "js/client" });
+      System.import("client.js");
+    </script>
+  </body>
+</html>
