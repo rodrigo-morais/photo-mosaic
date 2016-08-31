@@ -31,11 +31,13 @@ const addMosaicLines = (source, destination, row) => {
   const tile = getTilesLine(source, row)
 
   buildImageLine({'width': source.width, 'height': TILE_HEIGHT}, tile)
-    .then(image => context.drawImage(image, 0, row * TILE_HEIGHT))
-
-  if(row < rows){
-    addMosaicLines(source, destination, row + 1)
-  }
+    .then(image => {
+      context.drawImage(image, 0, row * TILE_HEIGHT)
+      
+      if(row < rows) {
+        addMosaicLines(source, destination, row + 1)
+      }
+    })
 }
 
 const createMosaic = () => {
