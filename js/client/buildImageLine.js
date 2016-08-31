@@ -6,17 +6,22 @@ const buildSVG = (size) => {
   return svg
 }
 
-const buildEllipse = (color, tile, multiplicator) => {
-  const ellipse = document
-                  .createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+const getEllipse = color => {
+  const newColor = color.split('#')[1]
+  const url =  'http://localhost:8765/color/' + (newColor.length === 6 ? newColor : '000000')
 
-  ellipse.setAttribute('cx', (((tile.width / 2) * multiplicator) + tile.width))
-  ellipse.setAttribute('cy', tile.height / 2)
-  ellipse.setAttribute('fill', color)
-  ellipse.setAttribute('rx', tile.width / 2)
-  ellipse.setAttribute('ry', tile.height / 2)
+  return url
+}
 
-  return ellipse
+const buildEllipse = (ellipse, tile, multiplicator) => {
+  const newEllipse = ellipse.cloneNode(true)
+
+  newEllipse.setAttribute('cx', (((tile.width / 2) * multiplicator) + tile.width))
+  newEllipse.setAttribute('cy', tile.height / 2)
+  newEllipse.setAttribute('rx', tile.width / 2)
+  newEllipse.setAttribute('ry', tile.height / 2)
+
+  return newEllipse
 }
 
 const convertSVGtoIMG = (svg) => {
@@ -31,28 +36,51 @@ const convertSVGtoIMG = (svg) => {
   return img
 }
 
-const buildEllipses = (tile, column, multiplicator) => {
+const getEllipses = (tile, column) => {
   const color = tile.colors[column]
 
   if(column > 0) {
-    return  [...buildEllipses(tile, column - 1, multiplicator + 2)
-            , buildEllipse(color, tile, multiplicator)
+    return  [...getEllipses(tile, column - 1)
+            , getEllipse(color)
             ]
   }
   else {
-    return buildEllipse(color, tile, multiplicator)
+    return [getEllipse(color, tile)]
   }
+}
+
+const buildEllipses = (tile, columns, multiplicador) => {
+
+  const options = { method: 'GET'
+                  , headers: new Headers({'Content-Type': 'image/svg+xml'})
+                  , mode: 'cors'
+                  , cache: 'default'
+                  }
+
+  return Promise.all(getEllipses(tile, columns)
+                .map(url => fetch(url, options)
+                              .then(response => response.text())
+                              .then(data => data)
+                )
+  )
+    .then(svgs => svgs.reverse()
+                    .map(element => (new DOMParser()).parseFromString(element, "text/xml").querySelector('ellipse'))
+                    .map((ellipse, index) => buildEllipse(ellipse, tile, multiplicador + ((index + 1) * 2)))
+    )
 }
 
 const buildImageLine = (row, tile) => {
   const svg = buildSVG(row)
   const columns = (row.width / tile.width) - 1
 
-  buildEllipses(tile, columns, 0).forEach(ellipse => {
-    svg.appendChild(ellipse)
-  })
+  return  buildEllipses(tile, columns, 0)
+            .then(ellipses => {
+                                ellipses
+                                  .map(ellipse => svg.appendChild(ellipse))
 
-  return convertSVGtoIMG(svg)
+                                return convertSVGtoIMG(svg)
+                              }
+            )
 }
 
 export default buildImageLine

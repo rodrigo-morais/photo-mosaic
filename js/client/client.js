@@ -30,7 +30,8 @@ const addMosaicLines = (source, destination, row) => {
   const rows = (source.height / TILE_HEIGHT) - 1
   const tile = getTilesLine(source, row)
 
-  context.drawImage(buildImageLine({'width': source.width, 'height': TILE_HEIGHT}, tile), 0, row * TILE_HEIGHT)
+  buildImageLine({'width': source.width, 'height': TILE_HEIGHT}, tile)
+    .then(image => context.drawImage(image, 0, row * TILE_HEIGHT))
 
   if(row < rows){
     addMosaicLines(source, destination, row + 1)
