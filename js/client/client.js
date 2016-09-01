@@ -25,32 +25,36 @@ const upload = (e) => {
   reader.readAsDataURL(file);
 }
 
-const addMosaicLines = (source, destination, row) => {
+const getTilesLines = (source, rows, row) => {
+  if(row < rows) {
+    return  [  getTilesLine(source, row)
+            , ...getTilesLines(source, rows, row + 1)
+            ]
+  }
+  else {
+    return [getTilesLine(source, row)]
+  }
+}
+
+const addMosaicLines = (source, destination) => {
   const context = destination.getContext('2d')
   const rows = (source.height / TILE_HEIGHT) - 1
-  const tile = getTilesLine(source, row)
+  const tiles = getTilesLines(source, rows, 0)
   const svg = builder.buildSVG({'width': source.width, 'height': TILE_HEIGHT})
-  const columns = (source.width / tile.width) - 1
+  const columns = (source.width / tiles[0].width) - 1
   const multiplicator = 0
-  const speed = TILE_HEIGHT >= 16 ? 2000 : TILE_HEIGHT >= 8 ? 8000 : 90000
 
   if (window.Worker) {
     const worker = new Worker('js/worker/worker.js')
 
     worker.addEventListener('message', e => {
-      builder.buildEllipses(e.data, tile, multiplicator)
+      builder.buildEllipses(e.data.svgs, e.data.tile, multiplicator)
         .map(ellipse => svg.appendChild(ellipse))
 
-      context.drawImage(builder.buildImage(svg), 0, row * TILE_HEIGHT)
-      worker.terminate()
+      context.drawImage(builder.buildImage(svg), 0, e.data.row * TILE_HEIGHT)
     }, false)
 
-    worker.postMessage({'cmd': 'getRawEllipses', 'tile': tile, 'columns': columns});
-
-    if(row < rows) {
-      setTimeout(
-      addMosaicLines(source, destination, row + 1), speed)
-    }
+    worker.postMessage({'cmd': 'getRawEllipses', 'rows': rows, 'tiles': tiles, 'columns': columns});
   }
 }
 
@@ -61,7 +65,7 @@ const createMosaic = () => {
   mosaic.width = canvas.width
   mosaic.height = canvas.height
 
-  addMosaicLines(canvas, mosaic, 0)
+  addMosaicLines(canvas, mosaic)
 }
 
 const main = () => {

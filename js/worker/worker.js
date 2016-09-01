@@ -9,8 +9,8 @@ const getEllipses = (tile, column) => {
   const color = tile.colors[column]
 
   if(column > 0) {
-    return  [...getEllipses(tile, column - 1)
-            , getEllipse(color)
+    return  [ getEllipse(color)
+            , ...getEllipses(tile, column - 1)
             ]
   }
   else {
@@ -18,7 +18,7 @@ const getEllipses = (tile, column) => {
   }
 }
 
-const joinEllipses = (tile, columns, multiplicador) => {
+const joinEllipses = (tile, columns) => {
 
   const options = { method: 'GET'
                   , headers: new Headers({'Content-Type': 'image/svg+xml'})
@@ -34,13 +34,26 @@ const joinEllipses = (tile, columns, multiplicador) => {
   )
 }
 
-const getRawEllipses = svgs => {
-  self.postMessage(svgs)
+const getRawEllipses = data => {
+  self.postMessage(data)
+}
+
+const buildEllipsesLines = (rows, row, columns, tiles) => {
+    joinEllipses(tiles[row], columns)
+      .then(svgs => getRawEllipses( { 'svgs': svgs
+                                    , 'tile': tiles[row]
+                                    , 'row': row
+                                    }
+                    )
+      )
+  
+    if(row < rows) {
+      buildEllipsesLines(rows, row + 1, columns, tiles)
+    }
 }
 
 self.addEventListener('message', function(e) {
   if (e.data.cmd === 'getRawEllipses') {
-    joinEllipses(e.data.tile, e.data.columns, 0)
-      .then(svgs => getRawEllipses(svgs.reverse()))
+    buildEllipsesLines(e.data.rows, 0, e.data.columns, e.data.tiles)
   }
 }, false)
