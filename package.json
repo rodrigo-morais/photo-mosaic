@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "scripts": {
     "start": "npm run build && node dist/server.js",
-    "build": "rm -Rf dist && babel js/client -d dist/js/client && npm run copy:html && npm run copy:server && npm run copy:mosaicJS",
+    "build": "rm -Rf dist && babel js/client -d dist/js/client && npm run copy:html && npm run copy:server && npm run copy:mosaicJS && npm run copy:worker && npm run copy:css",
     "copy:html": "cp mosaic.html dist/",
     "copy:server": "cp server.js dist",
-    "copy:mosaicJS": "cp js/mosaic.js dist/js"
+    "copy:mosaicJS": "cp js/mosaic.js dist/js",
+    "copy:worker": "cp -R js/worker dist/js/",
+    "copy:css": "cp -R css/ dist/css/"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

@@ -1,4 +1,4 @@
-import buildImageLine from './buildImageLine.js'
+import * as builder from './builder.js'
 import getTilesLine from './getTilesLine.js'
 
 const setImageCanvas = (image) => {
@@ -29,15 +29,29 @@ const addMosaicLines = (source, destination, row) => {
   const context = destination.getContext('2d')
   const rows = (source.height / TILE_HEIGHT) - 1
   const tile = getTilesLine(source, row)
+  const svg = builder.buildSVG({'width': source.width, 'height': TILE_HEIGHT})
+  const columns = (source.width / tile.width) - 1
+  const multiplicator = 0
+  const speed = TILE_HEIGHT >= 16 ? 2000 : TILE_HEIGHT >= 8 ? 8000 : 90000
 
-  buildImageLine({'width': source.width, 'height': TILE_HEIGHT}, tile)
-    .then(image => {
-      context.drawImage(image, 0, row * TILE_HEIGHT)
-      
-      if(row < rows) {
-        addMosaicLines(source, destination, row + 1)
-      }
-    })
+  if (window.Worker) {
+    const worker = new Worker('js/worker/worker.js')
+
+    worker.addEventListener('message', e => {
+      builder.buildEllipses(e.data, tile, multiplicator)
+        .map(ellipse => svg.appendChild(ellipse))
+
+      context.drawImage(builder.buildImage(svg), 0, row * TILE_HEIGHT)
+      worker.terminate()
+    }, false)
+
+    worker.postMessage({'cmd': 'getRawEllipses', 'tile': tile, 'columns': columns});
+
+    if(row < rows) {
+      setTimeout(
+      addMosaicLines(source, destination, row + 1), speed)
+    }
+  }
 }
 
 const createMosaic = () => {
