@@ -2,9 +2,10 @@ import * as builder from './builder.js'
 import getTilesLine from './getTilesLine.js'
 
 const setImageCanvas = (image) => {
-  const canvas = document.querySelector('#imgCanvas');
+  const canvas = document.querySelector('#imgCanvas')
   const ctx = canvas.getContext('2d');
 
+  canvas.style.display = 'block'
   canvas.width = image.width
   canvas.height = image.height
   ctx.drawImage(image, 0, 0)
@@ -15,6 +16,8 @@ const loadFile = (e) => {
 
   img.onload = e => setImageCanvas(e.target)
   img.src = e.target.result;
+
+  document.querySelector('#createMosaic').onclick = createMosaic
 }
 
 const upload = (e) => {
@@ -23,17 +26,6 @@ const upload = (e) => {
 
   reader.onload = loadFile
   reader.readAsDataURL(file);
-}
-
-const getTilesLines = (source, rows, row) => {
-  if(row < rows) {
-    return  [  getTilesLine(source, row)
-            , ...getTilesLines(source, rows, row + 1)
-            ]
-  }
-  else {
-    return [getTilesLine(source, row)]
-  }
 }
 
 const addMosaicLines = (source, destination) => {
@@ -69,15 +61,19 @@ const createMosaic = () => {
   const canvas = document.querySelector('#imgCanvas')
   const mosaic = document.querySelector('#mosaicCanvas')
 
+  document.querySelector('#createMosaic').onclick = null
+
   mosaic.width = canvas.width
   mosaic.height = canvas.height
+
+  canvas.style.display = 'none'
 
   addMosaicLines(canvas, mosaic)
 }
 
 const main = () => {
+  document.querySelector('#loadImage').onclick = () => document.querySelector('#files').click()
   document.querySelector('#files').onchange = upload
-  document.querySelector('#createMosaic').onclick = createMosaic
 }
 
 main()

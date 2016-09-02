@@ -4,7 +4,7 @@ html, body {
 }
 
 header {
-  height: 20%;
+  height: 10%;
   width: 100%;
   background-color: #C0C5CE;
   margin: 0;
@@ -15,8 +15,26 @@ header {
 
 header h1 {
   line-height: 100%;
-  width: 50vw;
+  width: 45vw;
   margin: 0;
   display: inline-block;
   padding: 1% 0 0 1%;
+}
+
+header button {
+  float: right;
+  margin: 0.7% 2% auto;
+  background-color: #FFFFFF;
+  border: solid 1px #000000;
+  border-radius: 5px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+header input {
+  display: none;
+}
+
+canvas {
+  margin: 2% 25% 0;
 }

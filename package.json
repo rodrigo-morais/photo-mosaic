@@ -9,7 +9,7 @@
     "copy:server": "cp server.js dist",
     "copy:mosaicJS": "cp js/mosaic.js dist/js",
     "copy:worker": "cp -R js/worker dist/js/",
-    "copy:css": "cp -R css/ dist/css/"
+    "copy:css": "cp -R css dist/"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
