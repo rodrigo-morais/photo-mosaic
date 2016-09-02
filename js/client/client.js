@@ -39,22 +39,29 @@ const getTilesLines = (source, rows, row) => {
 const addMosaicLines = (source, destination) => {
   const context = destination.getContext('2d')
   const rows = (source.height / TILE_HEIGHT) - 1
-  const tiles = getTilesLines(source, rows, 0)
   const svg = builder.buildSVG({'width': source.width, 'height': TILE_HEIGHT})
-  const columns = (source.width / tiles[0].width) - 1
   const multiplicator = 0
 
   if (window.Worker) {
     const worker = new Worker('js/worker/worker.js')
 
     worker.addEventListener('message', e => {
-      builder.buildEllipses(e.data.svgs, e.data.tile, multiplicator)
-        .map(ellipse => svg.appendChild(ellipse))
+      builder
+        .buildEllipses(e.data.svgs, e.data.tile, multiplicator)
+          .map(ellipse => svg.appendChild(ellipse))
 
       context.drawImage(builder.buildImage(svg), 0, e.data.row * TILE_HEIGHT)
     }, false)
 
-    worker.postMessage({'cmd': 'getRawEllipses', 'rows': rows, 'tiles': tiles, 'columns': columns});
+    Array.from(Array(rows).keys()).map((row, index) => {
+      const tile = getTilesLine(source, row)
+      const columns = (source.width / tile.width) - 1
+
+      setTimeout(() =>
+        worker.postMessage({'cmd': 'getRawEllipses', 'row': row, 'tile': tile, 'columns': columns})
+      , (index * ((16 / TILE_WIDTH) * 100))
+      )
+    })
   }
 }
 
